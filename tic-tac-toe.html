@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Tic Tac Toe for Aventica</title>
+  </head>
+  <body>
+    <div id="vue-container">
+      <canvas
+        ref="canvas-container"
+        style="border:1px solid #BBB;"
+        width="300"
+        height="300"
+        @click="clickLocationXY($event)"
+      ></canvas>
+
+      <p>PLAYER: {{ playerScore }}</p>
+      <p>COMPUTER: {{ computerScore }}</p>
+    </div>
+  </body>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script type="text/javascript">
+    var app = new Vue({
+      el: "#vue-container",
+      data: {
+        vueCtx: null,
+        matrixOfTransition: [
+          [0, 0],
+          [1, 0],
+          [2, 0],
+          [0, 1],
+          [1, 1],
+          [2, 1],
+          [0, 2],
+          [1, 2],
+          [2, 2]
+        ],
+        board: ["", "", "", "", "", "", "", "", ""],
+        winnerCombinations: [
+          [0, 1, 2],
+          [3, 4, 5],
+          [6, 7, 8],
+          [0, 3, 6],
+          [1, 4, 7],
+          [2, 5, 8],
+          [0, 4, 8],
+          [2, 4, 6]
+        ],
+        turn: 0,
+        playerScore: 0,
+        computerScore: 0
+      },
+      watch: {
+        turn() {
+          const res = this.checkGameScore();
+
+          if (this.turn === 9 && res === true) {
+            alert("Победила дружба! (Ничья)");
+            this.restartGame();
+          }
+        }
+      },
+      mounted() {
+        const canvas = this.$refs["canvas-container"];
+        const ctx = canvas.getContext("2d");
+        // set canvas reference to the vue
+        this.vueCanvas = canvas;
+        this.vueCtx = ctx;
+        // draw grid
+        this.drawGrid();
+
+        const domRect = canvas.getBoundingClientRect();
+        // save coordinates of the canvas field
+        this.XCanvas = domRect.x;
+        this.YCanvas = domRect.y;
+        // screening on resize
+        window.addEventListener("resize", this.updateDomRect);
+      },
+      methods: {
+        drawGrid() {
+          const ctx = this.vueCtx;
+
+          ctx.beginPath();
+          ctx.moveTo(0, 100);
+          ctx.lineTo(300, 100);
+          ctx.moveTo(0, 200);
+          ctx.lineTo(300, 200);
+          ctx.moveTo(100, 0);
+          ctx.lineTo(100, 300);
+          ctx.moveTo(200, 0);
+          ctx.lineTo(200, 300);
+          ctx.stroke();
+        },
+        updateDomRect() {
+          const domRect = this.vueCanvas.getBoundingClientRect();
+          this.XCanvas = domRect.x;
+          this.YCanvas = domRect.y;
+        },
+        checkGameScore() {
+          return this.winnerCombinations.every(el => {
+            if (
+              this.board[el[0]] === this.board[el[1]] &&
+              this.board[el[1]] === this.board[el[2]] &&
+              (this.board[el[0]] === "X" || this.board[el[0]] === "0")
+            ) {
+              this.drawStrikeOut(el);
+              // little delay for best user experience
+              setTimeout(() => {
+                // update game score
+                if (this.board[el[0]] === "X") {
+                  alert("Поздравляю!");
+                  this.playerScore++;
+                } else if (this.board[el[0]] === "0") {
+                  alert("Вы проиграли данное сражение!");
+                  this.computerScore++;
+                }
+                this.restartGame();
+              }, 250);
+
+              return false;
+            }
+            return true;
+          });
+        },
+        drawStrikeOut(vector) {
+          const ctx = this.vueCtx;
+          // center of cell, local frame
+          const x = 50;
+          const y = 50;
+          // definition coordinates of local frames at the global frame
+          // enough two points for drawing line
+          const x1Local = 100 * this.matrixOfTransition[vector[0]][0],
+            y1Local = 100 * this.matrixOfTransition[vector[0]][1],
+            x3Local = 100 * this.matrixOfTransition[vector[2]][0],
+            y3Local = 100 * this.matrixOfTransition[vector[2]][1];
+
+          const xi1 = x + x1Local,
+            yi1 = y + y1Local,
+            xi3 = x + x3Local,
+            yi3 = y + y3Local;
+
+          ctx.beginPath();
+          ctx.moveTo(xi1, yi1);
+          ctx.lineTo(xi3, yi3);
+          ctx.stroke();
+        },
+        restartGame() {
+          //prepare board, field and turn for new game
+          this.board = ["", "", "", "", "", "", "", "", ""];
+          this.turn = 0;
+          this.vueCtx.clearRect(0, 0, 300, 300);
+          this.drawGrid();
+        },
+        clickLocationXY(event) {
+          const x = event.clientX - this.XCanvas;
+          const y = event.clientY - this.YCanvas;
+          let match = null;
+
+          this.matrixOfTransition.forEach((cell, index) => {
+            if (
+              (x / 100 + 1) % (cell[0] + 1) < 1 &&
+              (y / 100 + 1) % (cell[1] + 1) < 1
+            ) {
+              // few cells fall under our condition, but we choose last one
+              match = index;
+            }
+          });
+
+          if (
+            this.board[match] === "" &&
+            this.board[match] !== "X" &&
+            this.board[match] !== "0"
+          ) {
+            this.drawCross(match);
+            this.$set(this.board, match, "X");
+            this.turn++;
+
+            if (this.turn <= 8) {
+              this.computerMove();
+            }
+          }
+        },
+        computerMove() {
+          let computerMove = 0;
+          do {
+            computerMove = Math.floor(Math.random() * 9);
+          } while (
+            this.board[computerMove] === "X" ||
+            this.board[computerMove] === "0"
+          );
+
+          this.drawCircle(computerMove);
+          this.board[computerMove] = "0";
+          this.turn++;
+        },
+        drawCross(cell) {
+          const ctx = this.vueCtx;
+          // template for cross points about local frame
+          const x1 = 25,
+            x2 = 75,
+            y1 = 25,
+            y2 = 75;
+          //definition coordinates of local frame at the global frame
+          let xLocal = 100 * this.matrixOfTransition[cell][0];
+          let yLocal = 100 * this.matrixOfTransition[cell][1];
+          //definition coordinates of points related global coordinates system
+          let x1i = x1 + xLocal,
+            x2i = x2 + xLocal,
+            y1i = y1 + yLocal,
+            y2i = y2 + yLocal;
+
+          ctx.beginPath();
+          ctx.moveTo(x1i, y1i);
+          ctx.lineTo(x2i, y2i);
+          ctx.moveTo(x1i, y2i);
+          ctx.lineTo(x2i, y1i);
+          ctx.stroke();
+        },
+        drawCircle(cell) {
+          const ctx = this.vueCtx;
+          // circle center point, local frame
+          const x = 50;
+          const y = 50;
+
+          //definition coordinates of local frame at the global frame
+          const xLocal = 100 * this.matrixOfTransition[cell][0];
+          const yLocal = 100 * this.matrixOfTransition[cell][1];
+
+          //definition coordinates of points related global coordinates system
+          const xi = x + xLocal;
+          const yi = y + yLocal;
+
+          ctx.beginPath();
+          ctx.arc(xi, yi, 25, 0, 360 * (Math.PI / 180));
+          ctx.closePath();
+          ctx.stroke();
+        }
+      }
+    });
+  </script>
+</html>
+
+<style type="text/css">
+  html,
+  body {
+    margin: 0;
+  }
+</style>
