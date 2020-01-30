@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="./style.css" />
     <title>Tic Tac Toe for Aventica</title>
   </head>
   <body>
@@ -33,6 +34,9 @@
       el: "#vue-container",
       data: {
         vueCtx: null,
+        vueCanvas: null,
+        xCanvas: 0,
+        yCanvas: 0,
         matrixOfTransition: [
           [0, 0],
           [1, 0],
@@ -80,8 +84,8 @@
 
         const domRect = canvas.getBoundingClientRect();
         // save coordinates of the canvas field
-        this.XCanvas = domRect.x;
-        this.YCanvas = domRect.y;
+        this.xCanvas = domRect.x;
+        this.yCanvas = domRect.y;
         // screening on resize
         window.addEventListener("resize", this.updateDomRect);
       },
@@ -106,8 +110,8 @@
         },
         updateDomRect() {
           const domRect = this.vueCanvas.getBoundingClientRect();
-          this.XCanvas = domRect.x;
-          this.YCanvas = domRect.y;
+          this.xCanvas = domRect.x;
+          this.yCanvas = domRect.y;
         },
         checkGameScore() {
           return this.winnerCombinations.every(el => {
@@ -169,8 +173,11 @@
           this.drawGrid();
         },
         clickLocationXY(event) {
-          const x = event.clientX - this.XCanvas;
-          const y = event.clientY - this.YCanvas;
+          const x = event.clientX - this.xCanvas;
+          const y = event.clientY - this.yCanvas;
+          // console.log(event.clientX, event.clientY);
+          // console.log(this.xCanvas, this.yCanvas);
+          // console.log(x, y);
           let match = null;
 
           this.matrixOfTransition.forEach((cell, index) => {
@@ -264,26 +271,3 @@
     });
   </script>
 </html>
-
-<style type="text/css">
-  html,
-  body {
-    margin: 0;
-  }
-
-  .playground {
-    margin: 0 auto;
-    width: 400px;
-    height: 400px;
-  }
-
-  .canvas {
-    display: flex;
-    justify-content: center;
-  }
-
-  .information {
-    text-align: center;
-    font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
-  }
-</style>
