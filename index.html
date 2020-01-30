@@ -9,7 +9,7 @@
   </head>
   <body>
     <div id="vue-container">
-      <h1>Tic-Tac-Toe</h1>
+      <h1 v-if="start">Tic-Tac-Toe</h1>
       <name-window v-on:start-event="start = true"></name-window>
       <div class="playground" v-if="start">
         <div class="canvas">
@@ -35,8 +35,10 @@
   <template id="name-window-template">
     <div class="name-container" v-show="!success">
       <h2>Enter your name to start play game</h2>
-      <input type="text" v-model="name" />
-      <button v-on:click="check">Start</button>
+      <div class="form-container">
+        <input type="text" v-model="name" />
+        <button v-on:click="check">Start</button>
+      </div>
       <p>{{ error }}</p>
     </div>
   </template>
