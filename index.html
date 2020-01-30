@@ -8,16 +8,22 @@
   </head>
   <body>
     <div id="vue-container">
-      <canvas
-        ref="canvas-container"
-        style="border:1px solid #BBB;"
-        width="300"
-        height="300"
-        @click="clickLocationXY($event)"
-      ></canvas>
+      <div class="playground">
+        <div class="canvas">
+          <canvas
+            ref="canvas-container"
+            style="border:2px solid rgb(0, 0, 0);"
+            width="300"
+            height="300"
+            @click="clickLocationXY($event)"
+          ></canvas>
+        </div>
 
-      <p>PLAYER: {{ playerScore }}</p>
-      <p>COMPUTER: {{ computerScore }}</p>
+        <div class="information">
+          <p>PLAYER: {{ playerScore }}</p>
+          <p>COMPUTER: {{ computerScore }}</p>
+        </div>
+      </div>
     </div>
   </body>
 
@@ -83,6 +89,10 @@
         drawGrid() {
           const ctx = this.vueCtx;
 
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 2;
+          ctx.globalAlpha = 1;
+
           ctx.beginPath();
           ctx.moveTo(0, 100);
           ctx.lineTo(300, 100);
@@ -141,6 +151,10 @@
             yi1 = y + y1Local,
             xi3 = x + x3Local,
             yi3 = y + y3Local;
+
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 5;
+          ctx.globalAlpha = 0.7;
 
           ctx.beginPath();
           ctx.moveTo(xi1, yi1);
@@ -212,6 +226,10 @@
             y1i = y1 + yLocal,
             y2i = y2 + yLocal;
 
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 10;
+          ctx.globalAlpha = 1;
+
           ctx.beginPath();
           ctx.moveTo(x1i, y1i);
           ctx.lineTo(x2i, y2i);
@@ -233,6 +251,10 @@
           const xi = x + xLocal;
           const yi = y + yLocal;
 
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 10;
+          ctx.globalAlpha = 1;
+
           ctx.beginPath();
           ctx.arc(xi, yi, 25, 0, 360 * (Math.PI / 180));
           ctx.closePath();
@@ -247,5 +269,21 @@
   html,
   body {
     margin: 0;
+  }
+
+  .playground {
+    margin: 0 auto;
+    width: 400px;
+    height: 400px;
+  }
+
+  .canvas {
+    display: flex;
+    justify-content: center;
+  }
+
+  .information {
+    text-align: center;
+    font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   }
 </style>
