@@ -9,7 +9,9 @@
   </head>
   <body>
     <div id="vue-container">
-      <div class="playground">
+      <h1>Tic-Tac-Toe</h1>
+      <name-window v-on:start-event="start = true"></name-window>
+      <div class="playground" v-if="start">
         <div class="canvas">
           <canvas
             ref="canvas-container"
@@ -29,10 +31,42 @@
   </body>
 
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <template id="name-window-template">
+    <div class="name-container" v-show="!success">
+      <h2>Enter your name to start play game</h2>
+      <input type="text" v-model="name" />
+      <button v-on:click="check">Start</button>
+      <p>{{ error }}</p>
+    </div>
+  </template>
+
   <script type="text/javascript">
+    Vue.component("name-window", {
+      template: "#name-window-template",
+      data() {
+        return {
+          name: "",
+          success: false,
+          error: ""
+        };
+      },
+      methods: {
+        check() {
+          if (!this.name) {
+            this.error = `Please don't forget about your nickname`;
+          } else {
+            this.success = true;
+            this.$emit("start-event");
+          }
+        }
+      }
+    });
+
     var app = new Vue({
       el: "#vue-container",
       data: {
+        start: false,
         vueCtx: null,
         vueCanvas: null,
         xCanvas: 0,
@@ -73,7 +107,7 @@
           }
         }
       },
-      mounted() {
+      updated() {
         const canvas = this.$refs["canvas-container"];
         const ctx = canvas.getContext("2d");
         // set canvas reference to the vue
